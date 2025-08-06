@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.20;
 
 contract RoseCoin {
-    string public name;
-    string public symbol;
-    uint256 public decimal;
-    uint256 totalSupply;
-    uint256 public supplyCap;
+    string public name = "RoseCoin";
+    string public symbol = "RSC";
+    uint8 public decimals = 18;
+    uint256 public totalSupply;
+    uint256 public supplyCap = 100_000e18;
     address private owner;
+    bool public paused;
 
+    event contractPaused();
+    event contractUnpaused();
+    event ownershipTransfered(address newOwner);
     event deposited(address to, uint256 depositAmount);
     event minted(address to, uint256 mintAmount);
     event burned(address from, address to, uint256 burnAmount);
@@ -20,32 +25,47 @@ contract RoseCoin {
     mapping(address => mapping(address => uint256)) public allowances;
     
     constructor() {
-        name = "RoseCoin";
-        symbol = "RSC";
-        decimal = 18;
-        supplyCap = 100_000e18;
+        owner = msg.sender;
     }
 
     modifier onlyOwner(){
-        if (msg.sender != owner) {
-            revert("Erc20: Not owner");
-            _;
-        }
+        require(msg.sender == owner, "Erc20: Not owner");
+        _;
+    }
+
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
     }
 
     /////////////////////////////////////
     //      EXTERNAL FUNCTIONS         //
     /////////////////////////////////////
 
+    function pause() external onlyOwner {
+        paused = true;
+        emit contractPaused();
+    }
 
-    function deposit(address to, uint256 depositAmount) external {
+    function unpause() external onlyOwner {
+        paused = false;
+        emit contractUnpaused();
+    }
+
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Zero address");
+        owner = newOwner;
+        emit ownershipTransfered(newOwner);
+    }
+
+    function deposit(address to, uint256 depositAmount) external whenNotPaused {
         if (depositAmount > 0 && totalSupply + depositAmount <= supplyCap){
             _deposit(to, depositAmount);
         }
     }
 
-
-    function mint(address to, uint256 mintAmount) public onlyOwner {
+    function mint(address to, uint256 mintAmount) external onlyOwner whenNotPaused {
         if (to == address(0)){
             revert("Erc20: Address Zero");
         }
@@ -55,7 +75,7 @@ contract RoseCoin {
         }
     }
 
-    function burn(address from, uint256 burnAmount) public onlyOwner {
+    function burn(address from, uint256 burnAmount) external onlyOwner whenNotPaused {
          if (from == address(0)){
             revert("Erc20: Address Zero");
         }
@@ -65,7 +85,7 @@ contract RoseCoin {
         }
     }
 
-    function transfer(address from, address to, uint256 transferAmount) external {
+    function transfer(address from, address to, uint256 transferAmount) external whenNotPaused {
         if (from == address(0) || to == address(0)){
             revert("Erc20: Address Zero");
             }
@@ -75,24 +95,37 @@ contract RoseCoin {
         }
     }
 
-    function approve(address owner, address spender, uint256 approveAmount) external {
-        if (owner != address(0) && spender != address(0)){
-            _approve(owner, spender, approveAmount);
+    function transferFrom(address from, address to, uint256 transferAmount) external whenNotPaused {
+    require(from != address(0) && to != address(0), "Erc20: Address zero");
+    require(transferAmount > 0, "Erc20: Zero spendAmount");
+    require(allowances[from][msg.sender] >= transferAmount, "Erc20: Insufficient allowance");
+    require(balanceOf[from] >= transferAmount, "Erc20: Insufficient balance");
+
+    allowances[from][msg.sender] -= transferAmount;
+    _transfer(from, to, transferAmount); 
+}
+
+    function approve(address spender, uint256 approveAmount) external whenNotPaused {
+        if (spender != address(0)){
+            _approve(spender, approveAmount);
         }
     }
 
-    function allowance(address owner, address spender, uint256 spendAmount) external view {
-        allowances[owner][spender];
-    }
-
-    function withdraw(address from, uint256 withdrawAmount) external {
-        if (withdrawAmount != 0 && withdrawAmount <= balanceOf[from]){
+    function withdraw(address from, uint256 withdrawAmount) external whenNotPaused {
+        require(withdrawAmount > 0 && withdrawAmount <= balanceOf[from], "Erc20: Invalid Amount");
             _withdraw(from, withdrawAmount);
-        }
     }
 
-    function getBalance(address user) external view {
-        balanceOf[user];
+    /////////////////////////////////////
+    //         VIEW FUNCTIONS          //
+    /////////////////////////////////////
+
+    function allowance(address _owner, address spender) external view returns(uint256) {
+        return allowances[_owner][spender];
+    }
+
+    function getBalance(address user) external view returns(uint256) {
+        return balanceOf[user];
     }
 
 
@@ -103,7 +136,7 @@ contract RoseCoin {
     function _deposit(address to, uint256 depositAmount) internal{
         balanceOf[to] += depositAmount;
         totalSupply += depositAmount;
-        emit deposited(to, depositAmount);
+        emit deposited(msg.sender, depositAmount);
     }
 
     function _mint(address to, uint256 mintAmount) internal {
@@ -124,15 +157,14 @@ contract RoseCoin {
         emit transfered(from, to, transferAmount);
     }
 
-    function _approve(address owner, address spender, uint256 approveAmount) internal {
-        allowances[owner][spender] = approveAmount;
-        emit approved(owner, spender, approveAmount);
+    function _approve(address spender, uint256 approveAmount) internal {
+        allowances[msg.sender][spender] = approveAmount;
+        emit approved(msg.sender, spender, approveAmount);
     }
 
     function _withdraw(address from, uint256 withdrawAmount) internal {
         balanceOf[from] -= withdrawAmount;
-        (bool success, ) = from.call{value: withdrawAmount}("");
-        require(success, "Erc20: Withdraw Failed");
+        totalSupply -= withdrawAmount;
         emit withdrawn(from, withdrawAmount);
     }
 }
