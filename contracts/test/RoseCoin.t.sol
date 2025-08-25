@@ -7,13 +7,18 @@ import "../src/RoseCoin.sol";
 
 contract RoseCoinTest is Test {
     RoseCoin public rosecoin;
+    address public owner;
+    address public User1;
 
     function setUp() public {
         rosecoin = new RoseCoin();
-        uint256 amount = 100;
-        address User1 = makeAddr(User1);
-        address User2 = makeAddr(User2);
     }
 
-    function test_mint() public {}
+     function test_mint() public {
+        uint256 amount = 1000e18;
+        vm.startPrank(User1);
+        vm.expectRevert();
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), 0);
+        }
 }
