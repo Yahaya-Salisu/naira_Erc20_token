@@ -17,6 +17,7 @@ contract RoseCoinTest is Test {
 
     function test_mint() public {
         unit256 amount = 1000e18;
+        vm.prank(owner);
         rosecoin.mint(User1, amount);
         assertEq(rosecoin.balanceOf(User1), amount);
   }
