@@ -60,7 +60,8 @@ contract RoseCoin {
     }
 
     function deposit(address to, uint256 depositAmount) external whenNotPaused {
-        if (depositAmount > 0 && totalSupply + depositAmount <= supplyCap){
+        require(depositAmount > 0, "Erc20: zero amount");
+        if (totalSupply + depositAmount <= supplyCap){
             _deposit(to, depositAmount);
         }
     }
@@ -69,10 +70,8 @@ contract RoseCoin {
         if (to == address(0)){
             revert("Erc20: Address Zero");
         }
-
-        if (mintAmount != 0 && totalSupply + mintAmount <= supplyCap){
+        require(mintAmount > 0 && totalSupply + mintAmount <= supplyCap, "Erc20: invalid amount");
         _mint(to, mintAmount);
-        }
     }
 
     function burn(address from, uint256 burnAmount) external onlyOwner whenNotPaused {
@@ -80,30 +79,25 @@ contract RoseCoin {
             revert("Erc20: Address Zero");
         }
 
-        if (burnAmount != 0 && burnAmount <= balanceOf[from]){
+        require(burnAmount > 0 && burnAmount <= balanceOf[from], "Erc20: invalid amount");
             _burn(from, burnAmount);
-        }
     }
 
     function transfer(address from, address to, uint256 transferAmount) external whenNotPaused {
-        if (from == address(0) || to == address(0)){
-            revert("Erc20: Address Zero");
-            }
-
-        if (transferAmount != 0 && transferAmount <= balanceOf[from]){
-            _transfer(from, to, transferAmount);
-        }
+        require(from != address(0) || to != address(0), "Erc20: Address Zero");
+        require(transferAmount > 0 && transferAmount <= balanceOf[from], "Erc20: invalid amount")
+        _transfer(from, to, transferAmount);
     }
 
     function transferFrom(address from, address to, uint256 transferAmount) external whenNotPaused {
-    require(from != address(0) && to != address(0), "Erc20: Address zero");
-    require(transferAmount > 0, "Erc20: Zero spendAmount");
-    require(allowances[from][msg.sender] >= transferAmount, "Erc20: Insufficient allowance");
-    require(balanceOf[from] >= transferAmount, "Erc20: Insufficient balance");
+        require(from != address(0) && to != address(0), "Erc20: Address zero");
+        require(transferAmount > 0, "Erc20: Zero spendAmount");
+        require(allowances[from][msg.sender] >= transferAmount, "Erc20: Insufficient allowance");
+        require(balanceOf[from] >= transferAmount, "Erc20: Insufficient balance");
 
-    allowances[from][msg.sender] -= transferAmount;
-    _transfer(from, to, transferAmount); 
-}
+        allowances[from][msg.sender] -= transferAmount;
+        _transfer(from, to, transferAmount); 
+    }
 
     function approve(address spender, uint256 approveAmount) external whenNotPaused {
         if (spender != address(0)){
