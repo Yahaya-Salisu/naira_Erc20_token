@@ -15,5 +15,9 @@ contract RoseCoinTest is Test {
         rosecoin = new RoseCoin();
     }
 
-    function test_mint() public {}
+    function test_mint() public {
+        unit256 amount = 1000e18;
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+  }
 }
