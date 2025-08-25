@@ -7,8 +7,9 @@ import "../src/RoseCoin.sol";
 
 contract RoseCoinTest is Test {
     RoseCoin public rosecoin;
-    address User1 = makeAddr(User1);
-    address User2 = makeAddr(User2);
+    address public owner;
+    address public User1;
+    address public User2;
 
     function setUp() public {
         rosecoin = new RoseCoin();
