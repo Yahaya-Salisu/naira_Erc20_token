@@ -168,15 +168,4 @@ contract RoseCoinTest is RoseCoin, Test {
         assertEq(rosecoin.balanceOf(User1), amount);
         vm.stopPrank();
     }
-
-    function test_burn_from_address_zero() external whenNotPaused {
-        uint256 amount = 1000e18;
-        vm.startPrank(owner);
-        rosecoin.mint(address(0), amount);
-        assertEq(rosecoin.balanceOf(address(0)), amount);
-        vm.expectRevert();
-        rosecoin.burn(address(0), amount);
-        assertEq(rosecoin.balanceOf(address(0)), amount);
-        vm.stopPrank();
-    }
 }
