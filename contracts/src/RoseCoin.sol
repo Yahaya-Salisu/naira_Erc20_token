@@ -29,13 +29,13 @@ contract RoseCoin {
     }
 
     modifier onlyOwner(){
-        require(msg.sender == owner, "Erc20: Not owner");
+        require(msg.sender == owner, "Erc20_not_owner()");
         _;
     }
 
 
     modifier whenNotPaused() {
-        require(!paused, "Contract is paused");
+        require(!paused, "Erc20_contract_is_paused()");
         _;
     }
 
@@ -54,7 +54,7 @@ contract RoseCoin {
     }
 
     function transferOwnership(address newOwner) external onlyOwner whenNotPaused {
-        require(newOwner != address(0), "Zero address");
+        require(newOwner != address(0), "Erc20_zero_address()");
         owner = newOwner;
         emit ownershipTransfered(newOwner);
     }
@@ -63,13 +63,13 @@ contract RoseCoin {
         if (depositAmount > 0) {
             _deposit(to, depositAmount);
         } else {
-            revert("Erc20: zero amount");
+            revert("Erc20_zero_amount()");
         }
     }
 
     function mint(address to, uint256 mintAmount) external onlyOwner whenNotPaused {
         if (to == address(0)){
-            revert("Erc20: Address Zero");
+            revert("Erc20_zero_address()");
         }
         require(mintAmount > 0 && totalSupply + mintAmount <= supplyCap, Erc20_invalid_amount());
         _mint(to, mintAmount);
@@ -77,7 +77,7 @@ contract RoseCoin {
 
     function burn(address from, uint256 burnAmount) external onlyOwner whenNotPaused {
          if (from == address(0)){
-            revert("Erc20: Address Zero");
+            revert("Erc20_zero_address()");
         }
 
         require(burnAmount > 0 && burnAmount <= balanceOf[from], Erc20_invalid_amount());
@@ -85,16 +85,17 @@ contract RoseCoin {
     }
 
     function transfer(address from, address to, uint256 transferAmount) external whenNotPaused {
-        require(from != address(0) || to != address(0), "Erc20: Address Zero");
+        require(from != address(0), "Erc20_zero_ddress()");
+        require(to != address(0), "Erc20_zero_address()");
         require(transferAmount > 0 && transferAmount <= balanceOf[from], Erc20_invalid_amount());
         _transfer(from, to, transferAmount);
     }
 
     function transferFrom(address from, address to, uint256 transferAmount) external whenNotPaused {
-        require(from != address(0) && to != address(0), "Erc20: Address zero");
-        require(transferAmount > 0, "Erc20: Zero spendAmount");
-        require(allowances[from][msg.sender] >= transferAmount, "Erc20: Insufficient allowance");
-        require(balanceOf[from] >= transferAmount, "Erc20: Insufficient balance");
+        require(from != address(0) && to != address(0), "Erc20_zero_address()");
+        require(transferAmount > 0, "Erc20_zero_spendAmount()");
+        require(allowances[from][msg.sender] >= transferAmount, "Erc20_insufficient_allowance()");
+        require(balanceOf[from] >= transferAmount, "Erc20_insufficient_balance()");
 
         allowances[from][msg.sender] -= transferAmount;
         _transfer(from, to, transferAmount); 
@@ -107,7 +108,7 @@ contract RoseCoin {
     }
 
     function withdraw(address from, uint256 withdrawAmount) external whenNotPaused {
-        require(withdrawAmount > 0 && withdrawAmount <= balanceOf[from], "Erc20: Invalid Amount");
+        require(withdrawAmount > 0 && withdrawAmount <= balanceOf[from], "Erc20_invalid_amount()");
             _withdraw(from, withdrawAmount);
     }
 

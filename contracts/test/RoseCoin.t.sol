@@ -10,11 +10,13 @@ contract RoseCoinTest is RoseCoin, Test {
     address public owner;
     address public newOwner;
     address public User1;
+    address public User2;
     
     function setUp() public {
         rosecoin = new RoseCoin();
         owner = address(this);
         User1 = makeAddr("User1");
+        User2 = makeAddr("User2");
         newOwner = makeAddr("newOwner");
     }
 
@@ -167,5 +169,79 @@ contract RoseCoinTest is RoseCoin, Test {
         rosecoin.burn(User1, overAmount);
         assertEq(rosecoin.balanceOf(User1), amount);
         vm.stopPrank();
+    }
+
+    function test_transfer() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.prank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+
+        vm.prank(User1);
+        rosecoin.transfer(User1, User2, amount);
+        assertEq(rosecoin.balanceOf(User2), amount);
+    }
+
+     function test_transfer_from_zero_address() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.prank(owner);
+        rosecoin.mint(address(0), amount);
+        assertEq(rosecoin.balanceOf(address(0)), amount);
+
+        vm.prank(address(0));
+        vm.expectRevert();
+        rosecoin.transfer(address(0), User2, amount);
+        assertEq(rosecoin.balanceOf(User2), 0);
+    }
+
+    function test_transfer_to_zero_address() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.prank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.transfer(User1, address(0), amount);
+        assertEq(rosecoin.balanceOf(address(0)), 0);
+    }
+
+    function test_transfer_zero_amount() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.prank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.transfer(User1, User2, 0);
+        assertEq(rosecoin.balanceOf(User2), 0);
+    }
+
+    function test_transfer_whenPaused() external {
+        uint256 amount = 1000e18;
+        vm.startPrank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        rosecoin.pause();
+        vm.stopPrank();
+
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.transfer(User1, User2, amount);
+        assertEq(rosecoin.balanceOf(User2), 0);
+    }
+
+    function test_transfer_exceeeds_userBalance() external whenNotPaused {
+        uint256 amount = 1000e18;
+        uint256 overAmount = 1100e18;
+        vm.prank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.transfer(User1, User2, overAmount);
+        assertEq(rosecoin.balanceOf(User2), 0);
     }
 }
