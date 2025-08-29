@@ -102,9 +102,8 @@ contract RoseCoin {
     }
 
     function approve(address spender, uint256 approveAmount) external whenNotPaused {
-        if (spender != address(0)){
-            _approve(spender, approveAmount);
-        }
+        require(spender != address(0), "Erc20_zero_ddress()");
+        _approve(spender, approveAmount);
     }
 
     function withdraw(address from, uint256 withdrawAmount) external whenNotPaused {
