@@ -332,7 +332,6 @@ contract RoseCoinTest is RoseCoin, Test {
         assertEq(rosecoin.balanceOf(address(0)), 0);
     }
 
-
     function test_approve_revert_if_spender_is_address_zero() external whenNotPaused {
         uint256 amount = 1000e18;
         vm.prank(owner);
