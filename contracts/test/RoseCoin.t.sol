@@ -52,6 +52,18 @@ contract RoseCoinTest is RoseCoin, Test {
         rosecoin.unpause();
     }
 
+    function test_pause_by_non_owner() external whenNotPaused {
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.pause();
+    }
+
+    function test_unpause_by_non_owner() external {
+        vm.prank(User1);
+        vm.expectRevert();
+        rosecoin.unpause();
+    }
+
     function test_deposit() external whenNotPaused {
         uint256 amount = 1000e18;
         vm.prank(User1);
@@ -169,7 +181,7 @@ contract RoseCoinTest is RoseCoin, Test {
         vm.stopPrank();
     }
 
-    function test_burn_exceeeds_userBalance() external whenNotPaused {
+    function test_burn_revert_if_exceeeds_userBalance() external whenNotPaused {
         uint256 amount = 1000e18;
         uint256 overAmount = 1100e18;
         vm.startPrank(owner);
@@ -242,7 +254,7 @@ contract RoseCoinTest is RoseCoin, Test {
         assertEq(rosecoin.balanceOf(User2), 0);
     }
 
-    function test_transfer_exceeeds_userBalance() external whenNotPaused {
+    function test_transfer_revert_if_exceeeds_userBalance() external whenNotPaused {
         uint256 amount = 1000e18;
         uint256 overAmount = 1100e18;
         vm.prank(owner);
@@ -342,5 +354,57 @@ contract RoseCoinTest is RoseCoin, Test {
         vm.expectRevert();
         rosecoin.approve(address(0), amount);
         assertEq(rosecoin.balanceOf(address(0)), 0);
+    }
+
+    function test_withdraw() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.startPrank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        vm.stopPrank();
+        vm.startPrank(User1);
+        rosecoin.withdraw(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), 0);
+        vm.stopPrank();
+    }
+
+    function test_withdraw_zero_amount() external whenNotPaused {
+        uint256 amount = 1000e18;
+        vm.startPrank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        vm.stopPrank();
+        vm.startPrank(User1);
+        vm.expectRevert();
+        rosecoin.withdraw(User1, 0);
+        assertEq(rosecoin.balanceOf(User1), amount);
+    }
+
+    function test_withdraw_whenPaused() external {
+        uint256 amount = 1000e18;
+        vm.startPrank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        rosecoin.pause();
+        vm.stopPrank();
+        vm.startPrank(User1);
+        vm.expectRevert();
+        rosecoin.withdraw(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        vm.stopPrank();
+    }
+
+    function test_withdraw_revert_if_exceeeds_userBalance() external whenNotPaused {
+        uint256 amount = 1000e18;
+        uint256 overAmount = 1100e18;
+        vm.startPrank(owner);
+        rosecoin.mint(User1, amount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        vm.stopPrank();
+        vm.startPrank(User1);
+        vm.expectRevert();
+        rosecoin.withdraw(User1, overAmount);
+        assertEq(rosecoin.balanceOf(User1), amount);
+        vm.stopPrank();
     }
 }

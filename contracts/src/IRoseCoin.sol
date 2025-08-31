@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.20;
 
-import "./RoseCoin.sol";
-
 interface IRoseCoin {
 
     function pause() external;
