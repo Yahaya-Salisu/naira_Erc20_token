@@ -52,7 +52,6 @@ contract RoseCoinTest is RoseCoin, Test {
         rosecoin.unpause();
     }
 
-<<<<<<< HEAD
     function test_pause_by_non_owner() external whenNotPaused {
         vm.prank(User1);
         vm.expectRevert();
@@ -65,8 +64,6 @@ contract RoseCoinTest is RoseCoin, Test {
         rosecoin.unpause();
     }
 
-=======
->>>>>>> 9d2af0754d61bc59ef882e9344b892b2a3290809
     function test_deposit() external whenNotPaused {
         uint256 amount = 1000e18;
         vm.prank(User1);
