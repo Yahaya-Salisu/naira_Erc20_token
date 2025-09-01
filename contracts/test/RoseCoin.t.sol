@@ -181,11 +181,7 @@ contract RoseCoinTest is RoseCoin, Test {
         vm.stopPrank();
     }
 
-<<<<<<< HEAD
     function test_burn_revert_if_exceeeds_userBalance() external whenNotPaused {
-=======
-    function test_burn_exceeeds_userBalance() external whenNotPaused {
->>>>>>> 9d2af0754d61bc59ef882e9344b892b2a3290809
         uint256 amount = 1000e18;
         uint256 overAmount = 1100e18;
         vm.startPrank(owner);
@@ -258,11 +254,7 @@ contract RoseCoinTest is RoseCoin, Test {
         assertEq(rosecoin.balanceOf(User2), 0);
     }
 
-<<<<<<< HEAD
     function test_transfer_revert_if_exceeeds_userBalance() external whenNotPaused {
-=======
-    function test_transfer_exceeeds_userBalance() external whenNotPaused {
->>>>>>> 9d2af0754d61bc59ef882e9344b892b2a3290809
         uint256 amount = 1000e18;
         uint256 overAmount = 1100e18;
         vm.prank(owner);
@@ -363,7 +355,6 @@ contract RoseCoinTest is RoseCoin, Test {
         rosecoin.approve(address(0), amount);
         assertEq(rosecoin.balanceOf(address(0)), 0);
     }
-<<<<<<< HEAD
 
     function test_withdraw() external whenNotPaused {
         uint256 amount = 1000e18;
@@ -416,6 +407,4 @@ contract RoseCoinTest is RoseCoin, Test {
         assertEq(rosecoin.balanceOf(User1), amount);
         vm.stopPrank();
     }
-=======
->>>>>>> 9d2af0754d61bc59ef882e9344b892b2a3290809
 }
