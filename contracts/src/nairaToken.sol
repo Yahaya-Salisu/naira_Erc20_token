@@ -6,7 +6,7 @@ import "./INairaToken.sol";
 
 contract nairaToken is INairaToken {
     string public name = "nairaToken";
-    string public symbol = "RSC";
+    string public symbol = "naira";
     uint8 public decimals = 18;
     uint256 public totalSupply;
     uint256 public supplyCap = 100_000e18;
