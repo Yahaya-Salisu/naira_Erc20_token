@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.20;
 
-import "./IRoseCoin.sol";
+import "./INairaToken.sol";
 
-contract RoseCoin is IRoseCoin {
-    string public name = "RoseCoin";
+contract nairaToken is INairaToken {
+    string public name = "nairaToken";
     string public symbol = "RSC";
     uint8 public decimals = 18;
     uint256 public totalSupply;

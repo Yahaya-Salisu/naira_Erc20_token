@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.20;
 
-interface IRoseCoin {
+interface INairaToken {
 
     function pause() external;
 
