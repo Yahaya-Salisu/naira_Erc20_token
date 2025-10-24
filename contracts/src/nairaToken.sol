@@ -13,15 +13,6 @@ contract nairaToken is INairaToken {
     address private owner;
     bool public paused;
 
-    error Erc20_not_owner();
-    error Erc20_contract_is_paused();
-    error Erc20_zero_address();
-    error Erc20_zero_amount();
-    error Erc20_invalid_amount();
-    error Erc20_zero_spendAmount();
-    error Erc20_insufficient_allowance();
-    error Erc20_insufficient_balance();
-
     event contractPaused();
     event contractUnpaused();
     event ownershipTransfered(address newOwner);
@@ -40,13 +31,13 @@ contract nairaToken is INairaToken {
     }
 
     modifier onlyOwner(){
-        require(msg.sender == owner, Erc20_not_owner());
+        require(msg.sender == owner, "Erc20_not_owner");
         _;
     }
 
 
     modifier whenNotPaused() {
-        require(!paused, Erc20_contract_is_paused());
+        require(!paused, "Erc20_contract_is_paused");
         _;
     }
 
@@ -65,7 +56,7 @@ contract nairaToken is INairaToken {
     }
 
     function transferOwnership(address newOwner) external onlyOwner whenNotPaused {
-        require(newOwner != address(0), Erc20_zero_address());
+        require(newOwner != address(0), "Erc20_zero_address");
         owner = newOwner;
         emit ownershipTransfered(newOwner);
     }
@@ -80,45 +71,45 @@ contract nairaToken is INairaToken {
 
     function mint(address to, uint256 mintAmount) external onlyOwner whenNotPaused {
         if (to == address(0)){
-            revert("Erc20_zero_address()");
+            revert("Erc20_zero_address");
         }
-        require(mintAmount > 0 && totalSupply + mintAmount <= supplyCap, Erc20_zero_amount());
+        require(mintAmount > 0 && totalSupply + mintAmount <= supplyCap, "Erc20_zero_amount");
         _mint(to, mintAmount);
     }
 
     function burn(address from, uint256 burnAmount) external onlyOwner whenNotPaused {
          if (from == address(0)){
-            revert("Erc20_zero_address()");
+            revert("Erc20_zero_address");
         }
 
-        require(burnAmount > 0 && burnAmount <= balanceOf[from], Erc20_invalid_amount());
+        require(burnAmount > 0 && burnAmount <= balanceOf[from], "Erc20_invalid_amount");
             _burn(from, burnAmount);
     }
 
     function transfer(address from, address to, uint256 transferAmount) external whenNotPaused {
-        require(from != address(0), Erc20_zero_address());
-        require(to != address(0), Erc20_zero_address());
-        require(transferAmount > 0 && transferAmount <= balanceOf[from], Erc20_invalid_amount());
+        require(from != address(0), "Erc20_zero_address");
+        require(to != address(0), "Erc20_zero_address");
+        require(transferAmount > 0 && transferAmount <= balanceOf[from], "Erc20_invalid_amount");
         _transfer(from, to, transferAmount);
     }
 
     function transferFrom(address from, address to, uint256 transferAmount) external whenNotPaused {
-        require(from != address(0) && to != address(0), Erc20_zero_address());
-        require(transferAmount > 0, Erc20_zero_spendAmount());
-        require(allowances[from][msg.sender] >= transferAmount, Erc20_insufficient_allowance());
-        require(balanceOf[from] >= transferAmount, Erc20_insufficient_balance());
+        require(from != address(0) && to != address(0), "Erc20_zero_address");
+        require(transferAmount > 0, "Erc20_zero_spendAmount");
+        require(allowances[from][msg.sender] >= transferAmount, "Erc20_insufficient_allowance");
+        require(balanceOf[from] >= transferAmount, "Erc20_insufficient_balance");
 
         allowances[from][msg.sender] -= transferAmount;
         _transfer(from, to, transferAmount); 
     }
 
     function approve(address spender, uint256 approveAmount) external whenNotPaused {
-        require(spender != address(0), Erc20_zero_address());
+        require(spender != address(0), "Erc20_zero_address");
         _approve(spender, approveAmount);
     }
 
     function withdraw(address from, uint256 withdrawAmount) external whenNotPaused {
-        require(withdrawAmount > 0 && withdrawAmount <= balanceOf[from], Erc20_invalid_amount());
+        require(withdrawAmount > 0 && withdrawAmount <= balanceOf[from], "Erc20_invalid_amount");
             _withdraw(from, withdrawAmount);
     }
 

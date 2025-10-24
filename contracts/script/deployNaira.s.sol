@@ -9,7 +9,7 @@ contract deployNaira is Script {
     nairaToken public naira;
 
     function run() public {
-        
+        vm.createSelectFork(vm.envString("ETH_RPC_URL"));
         vm.startBroadcast();
         naira = new nairaToken();
         vm.stopBroadcast();
